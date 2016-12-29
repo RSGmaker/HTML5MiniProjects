@@ -1,0 +1,412 @@
+<html>
+<head>
+<title>
+Scene Creator(alpha) by RSGmaker
+</title>
+</head>
+<body id="drop" onclick="" onmousedown="return myf(event);" onmouseup="mu(event)" onmousemove="mv(event)" style="overflow: hidden;margin: 0;padding: 0;" onkeydown="KD(event)" ondblclick="dc(event)" >
+<div id="DVV" width="100%" height="100%" onmousedown="return myf(event);" onmouseup="mu(event)" onmousemove="mv(event)" onkeydown="KD(event)">
+</div>
+<div id="dme" contenteditable="false">Drag your images from your desktop into this page to get started.</div>
+</body>
+<script>
+//switch to div tag to allow mouse events to work in the whole window
+//onmouseout="clearCoor()"
+/*
+<div id="dme" contenteditable="true">
+<p contenteditable="true" style="contenteditable:true;">Drag images into the window to add them to the scene</p>
+</div>
+*/
+var mode = 0;
+var tobj = -1;
+var lobj = -1;
+var OV = 0;
+var ox = -1;
+var oy = -1;
+var count = 0;
+var toload = 0;
+var imgs = new Array();
+var DRP = document.getElementById('drop');
+document.body.style.backgroundColor = "grey";
+var DV = document.getElementById('DVV');
+//<div id="coordiv" style="width:100%;height:100%;"></div>
+//onmousemove="myFunction(event)"
+//style="position:absolute; left: 500; top: 100;"
+function mo(e)
+{
+	return true;
+	if (lobj.tagName=="DIV")
+	{
+		lobj.setAttribute("contenteditable","false");
+	}
+}
+function dc(e)
+{
+	if (lobj.tagName=="DIV")
+	{
+	//alert(""+lobj.getAttribute("contenteditable"))
+		if (lobj.getAttribute("contenteditable")=="true")
+		{
+			lobj.setAttribute("contenteditable","false");
+		}
+		else
+		{
+			lobj.setAttribute("contenteditable","true");
+		}
+	}
+}
+function KD(e)
+{
+	if (lobj.tagName=="DIV")
+	{
+		if (lobj.getAttribute("contenteditable")=="true")
+		{
+			return true;
+		}
+	}
+	if (e.keyCode == 46)
+	{
+		DRP.removeChild(lobj);
+		count--;
+	}
+	if (e.keyCode == 38)
+	{
+		if (lobj.style.zIndex<count)
+		{
+			lobj.style.zIndex++;
+		}
+		else
+		{
+			if (lobj.style.zIndex!=count)
+			{
+				lobj.style.zIndex=1;
+			}
+		}
+	}
+	if (e.keyCode == 40)
+	{
+		if (lobj.style.zIndex>0)
+		{
+			lobj.style.zIndex--;
+		}
+		else
+		{
+			if (lobj.style.zIndex!=0)
+			{
+				lobj.style.zIndex=0;
+			}
+		}
+	}
+	//alert(""+e.keyCode);
+	if (e.keyCode == 65)
+	{
+		var temp = prompt("enter a url of image to import","");
+		if (temp!="")
+		{
+			var img = document.createElement("img"); 
+		img.src = temp;
+    
+		imgs[count]=new Image;
+		imgs[count].src = temp;
+	
+		count = count+1;
+		DRP.appendChild(img);
+		DRP.removeChild(document.getElementById('dme'));
+		}
+	}
+	if (e.keyCode == 66)
+	{
+		var temp = prompt("enter a color",""+document.body.style.backgroundColor);
+		
+		document.body.style.backgroundColor = temp;
+	}
+	if (e.keyCode == 67 && lobj.tagName=="DIV")
+	{
+		var temp = prompt("enter a color",""+lobj.style.color);
+		
+		lobj.style.color = temp;
+	}
+	if (e.keyCode == 86 && lobj.tagName=="DIV")
+	{
+		var temp = prompt("enter a font name",""+lobj.style.fontFamily);
+		
+		lobj.style.fontFamily = temp;
+	}
+	if (e.keyCode == 70)
+	{
+		//if (typeof lobj.dir === "undefined")
+		if (lobj.direction == 1)
+		{
+			lobj.direction = -1;
+		}
+		else
+		{
+			lobj.direction = 1;
+		}
+		//lobj.dir = lobj.dir*-1;
+		lobj.style.WebkitTransform = "rotate("+lobj.rot+"deg) scaleX("+(lobj.scale*lobj.direction)+") scaleY("+lobj.scale+")";
+		lobj.style.transform = lobj.style.WebkitTransform;
+		lobj.style.MozTransform = lobj.style.WebkitTransform;
+	}
+	if (e.keyCode == 84)
+	{
+		var NT = document.createElement("DIV");
+		NT.innerHTML="Double-click to edit Me!";
+		NT.setAttribute("contenteditable","true");
+		document.body.appendChild(NT);
+	}
+	//fontFamily
+	if (e.keyCode == 107)
+	{
+		//lobj.style.opacity = 1;
+		var W = 1 - (lobj.style.opacity);
+		W -= 0.04;
+		lobj.style.opacity = 1;
+		lobj.style.opacity -= W;
+		//lobj.style.opacity = lobj.style.opacity + 0.05;
+		//lobj.style.opacity = lobj.style.opacity + 0.05;
+		if (lobj.style.opacity > 1)
+		{
+			lobj.style.opacity = 1;
+		}
+	}
+	if (e.keyCode == 109)
+	{
+		lobj.style.opacity-=0.04;
+		if (lobj.style.opacity<0.04)
+		{
+			lobj.style.opacity = 0.04;
+		}
+	}
+	return false;
+}
+function myf(e)
+{
+x=e.clientX;
+y=e.clientY;
+mode = 1;
+//alert(""+e.target.tagName)
+ox = 0;
+oy = 0;
+if (typeof e.target === "undefined" || e.target == DV || e.target == DRP)
+{
+}
+else
+{
+tobj = e.target;
+lobj = tobj;
+if (typeof tobj.scale === "undefined")
+{
+	tobj.scale = 1;
+	tobj.rot = 0;
+	tobj.style.position="absolute";
+	tobj.style.left = 0;
+	tobj.style.top = 0;
+	tobj.style.opacity=1;
+	tobj.direction = 1;
+	//alert("set!!mode:"+mode)
+}
+ox = parseInt(tobj.style.left,10) - x;
+oy = parseInt(tobj.style.top,10) - y;
+//alert("left:"+ tobj.style.left + " offset:" + ox);
+//ox = 30;
+//oy = 5;
+//blb = frg;
+}
+
+if (e.ctrlKey==1)
+{
+	//rotate mode
+	mode = 2;
+	OV = tobj.rot;
+	ox = x;
+	oy = y;
+}
+if (e.shiftKey==1)
+{
+	//scale
+	mode = 3;
+	OV = tobj.scale;
+	ox = x;
+	oy = y;
+}
+
+//e.target.style.left = x-(e.target.width / 2 );
+//e.target.style.top = y-(e.target.height / 2);
+return e.target.tagName!='IMG';
+//return false;
+}
+function mv(e)
+{
+x=e.clientX;
+y=e.clientY;
+//tobj = document.getElementById('dme');
+if (mode==2)
+{
+	//tobj.style.transform = "rotate(" + (x-ox) + "deg)";
+	tobj.rot = OV+((x-ox) / 2);
+}
+if (mode==3)
+{
+	tobj.scale = OV+(((x-ox) / 100));
+	if (tobj.scale<0.01)
+	{
+		tobj.scale=0.01;
+	}
+}
+if (mode==1)
+{
+//clientWidth
+tobj.style.position="absolute";
+//tobj.style.left = x-(tobj.clientWidth / 2 );
+//tobj.style.top = y-(tobj.clientHeight / 2);
+tobj.style.left = x + ox;
+tobj.style.top = y + oy;
+		/*
+	if (tobj.tagName=="DIV")
+	{
+		tobj.style.left = x;
+		tobj.style.top = y;
+	}
+	else
+	{
+		tobj.style.left = x-(tobj.width / 2 );
+		tobj.style.top = y-(tobj.height / 2);
+	}*/
+	
+	
+	//blargl=flargle;
+}
+else
+{
+	if (mode != 0)
+	{
+		tobj.style.WebkitTransform = "rotate("+tobj.rot+"deg) scaleX("+(tobj.scale*tobj.direction)+") scaleY("+tobj.scale+")";
+		tobj.style.transform = tobj.style.WebkitTransform;
+		tobj.style.MozTransform = tobj.style.WebkitTransform;
+	}
+}
+
+}
+function mu(e)
+{
+	mode=0;
+	tobj=-1;
+}
+function myFunction(e)
+{
+x=e.clientX;
+y=e.clientY;
+coor="Coordinates: (" + x + "," + y + ")";
+document.getElementById("demo").innerHTML=coor
+S = document.getElementById("svg");
+S.style.left = x-(S.width / 2 );
+S.style.top = y-(S.height / 2);
+}
+
+if(window.FileReader) { 
+ var drop;
+ //addEventHandler(fimg, 'onclick',zoom()); 
+ addEventHandler(window, 'load', function() {
+    //var status = document.getElementById('status');
+    drop   = document.getElementById('drop');
+	//var prv   = document.getElementById('preview');
+    //var list   = document.getElementById('list');
+  	
+    function cancel(e) {
+      if (e.preventDefault) { e.preventDefault(); }
+      return false;
+    }
+	function dropitem (e) {
+  e = e || window.event; // get window.event if e argument missing (in IE)   
+  if (e.preventDefault) { e.preventDefault(); } // stops the browser from redirecting off to the image.
+
+  var dt    = e.dataTransfer;
+  var files = dt.files;
+  toload = toload + files.length;
+  var IU = e.dataTransfer.getData('Text');
+  //alert(IU);
+  if (IU != null && ((IU.indexOf("data")==0 && IU.indexOf(";base64,")>-1)) || IU.indexOf("http://")==0)
+  {
+	var I = new Image();
+	I.src = IU;
+	
+	DRP.appendChild(I);
+  }
+  for (var i=0; i<files.length; i++) {
+    var file = files[i];
+    var reader = new FileReader();
+      
+    //attach event handlers here...
+   
+    reader.readAsDataURL(file);
+addEventHandler(reader, 'loadend', function(e, file) {
+    var bin           = this.result; 
+    var newFile       = document.createElement('div');
+    //list.appendChild(newFile);  
+    //var fileNumber = list.getElementsByTagName('div').length;
+	var fileNumber = count;
+
+    var img = document.createElement("img"); 
+    img.file = file;   
+    img.src = bin;
+    
+    imgs[count]=new Image;
+	imgs[count].src = bin;
+	
+	/*if (count==0){
+	  cv.width = imgs[count].width;
+	  cv.height = imgs[count].height;
+	}*/
+    count = count+1;
+	
+    //list.appendChild(img);
+	toload = toload - 1;
+	drop.appendChild(img);
+	drop.removeChild(document.getElementById('dme'));
+	//DrawComic();
+}.bindToEventHandler(file));
+
+  }
+  
+  return false;
+};
+  
+    // Tells the browser that we *can* drop on this target
+    addEventHandler(drop, 'dragover', cancel);
+    addEventHandler(drop, 'dragenter', cancel);
+
+addEventHandler(drop, 'drop', dropitem);
+
+addEventHandler(DVV, 'dragover', cancel);
+    addEventHandler(DVV, 'dragenter', cancel);
+
+addEventHandler(DVV, 'drop', dropitem);
+Function.prototype.bindToEventHandler = function bindToEventHandler() {
+  var handler = this;
+  var boundParameters = Array.prototype.slice.call(arguments);
+  //create closure
+  return function(e) {
+      e = e || window.event; // get window.event if e argument missing (in IE)   
+      boundParameters.unshift(e);
+      handler.apply(this, boundParameters);
+  }
+};
+  });
+} else { 
+  document.getElementById('status').innerHTML = 'Your browser does not support the HTML5 FileReader.';
+}
+function addEventHandler(obj, evt, handler) {
+    if(obj.addEventListener) {
+        // W3C method
+        obj.addEventListener(evt, handler, false);
+    } else if(obj.attachEvent) {
+        // IE method.
+        obj.attachEvent('on'+evt, handler);
+    } else {
+        // Old school method.
+        obj['on'+evt] = handler;
+    }
+}
+</script>
+</html>
